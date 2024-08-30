@@ -1,4 +1,4 @@
-import {Button, Card, FormControlLabel, Switch, Table, TableCell, TableContainer, TableHead, TableRow} from '@suid/material';
+import {Button, Card, FormControlLabel, Switch, Table, TableCell, TableContainer, TableHead, TableRow, useTheme} from '@suid/material';
 import {For, Setter, Show, createEffect, createSignal} from 'solid-js';
 import {PlayerInfo} from './App';
 import {shuffle} from './util';
@@ -66,12 +66,14 @@ export function Overview(props: {
     const data = () => playerView()
         ? shuffle(fullData().map(([_, s, v, d, ...w]) => [s + v, w.reduce((a, b) => a + b, 0), d]))
         : fullData();
+    const [showAllStates, setShowAllStates] = createSignal(false);
+    const theme = useTheme();
     return <>
         <FormControlLabel
             control={<Switch defaultChecked onChange={(e) => setPlayerView(e.target.checked)} />}
             label="Show player view"
         />
-        <TableContainer component={Card} sx={{width: "75%", maxWidth: 600}}>
+        <TableContainer component={Card} sx={{width: "75%", maxWidth: 800}}>
             <Table sx={{width: "100%"}}>
                 <TableHead>
                     <TableRow>
@@ -115,6 +117,36 @@ export function Overview(props: {
                 )}</For>
             </Table>
         </TableContainer>
+        <Show when={!playerView()}>
+            States left: {props.possibilities.length}
+            <FormControlLabel
+                control={<Switch onChange={(e) => setShowAllStates(e.target.checked)} />}
+                label="Show all states"
+            />
+            <Show when={showAllStates()}>
+                <TableContainer component={Card} sx={{width: "100%"}}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <For each={props.players}>{player => (
+                                    <TableCell>{player}</TableCell>
+                                )}</For>
+                            </TableRow>
+                        </TableHead>
+                        <For each={props.possibilities}>{(poss) => (
+                            <TableRow>
+                                <For each={poss}>{(i) => (
+                                    <TableCell sx={i.alive ? undefined : {
+                                        color: theme.palette.text.disabled,
+                                        fontStyle: "italic",
+                                    }}>{i.role.replace("wolf", "wolf ")}</TableCell>
+                                )}</For>
+                            </TableRow>
+                        )}</For>
+                    </Table>
+                </TableContainer>
+            </Show>
+        </Show>
     </>;
 }
 
