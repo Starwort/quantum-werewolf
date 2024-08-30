@@ -97,7 +97,9 @@ export function Overview(props: {
                             <TableCell>
                                 <Button onClick={() => {
                                     props.updatePossibilities(
-                                        poss => poss.map(
+                                        poss => poss.filter(
+                                            poss => poss[i()].alive
+                                        ).map(
                                             poss => poss.map((p, j) => ({
                                                 ...p,
                                                 alive: p.alive && j != i(),
